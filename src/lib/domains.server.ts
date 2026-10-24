@@ -142,6 +142,10 @@ export async function findHandleForHost(host: string): Promise<string | null> {
       join public.profiles p on p.id = d.user_id
      where d.domain = ${clean}
        and d.status = 'verified'
+       and coalesce(p.is_banned, false) = false
+       and coalesce(p.is_suspended, false) = false
+       and coalesce(p.status, 'active') not in ('frozen', 'banned', 'suspended')
+       and coalesce((p.display_prefs->>'publicProfile')::boolean, true)
      limit 1
   `) as Row[];
 
