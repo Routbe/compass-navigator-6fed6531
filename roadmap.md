@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Vervolg 2026-10-24 09:49: resterende sprinttaken hervatten; loginconsent losmaken van workspace-consoletoegang, rondleidingen afwerken en vraagstories voorbereiden; geen sessieverwijdering of db/99 zonder afzonderlijk akkoord.
 - [x] Profielfoto: afwijzing van het uploadadres gereproduceerd en hersteld voor root- en aliasprofielen; 6 regressietests en volledige suite (717 tests) geslaagd.
 - [ ] Profielfoto ingelogd uploaden → opslaan → teruglezen: wacht op een beschikbare ROUT-sessie; geen managed browserlogin beschikbaar.
 - [ ] Volledige hercontrole nieuwe briefings 2026-10-24: veiligheid, één-pagina-wisselaar, OAuth-scope/redirects, profielprivacy en alle tests; live sessies/DNS/e-mail en echte migraties alleen met controleerbare toegang en expliciet wijzigingsakkoord.

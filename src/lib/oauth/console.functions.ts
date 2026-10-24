@@ -374,7 +374,7 @@ async function checkRequest(data: AuthorizeInput) {
 import { redirectWith, errorRedirect } from "./authorize-redirect";
 
 export const describeAuthorizeRequest = createServerFn({ method: "POST" })
-  .middleware([requireDeveloperAccess])
+  .middleware([requireAuth])
   .inputValidator((data: unknown) => authorizeSchema.parse(data))
   .handler(async ({ data, context }): Promise<AuthorizePrompt> => {
     const checked = await checkRequest(data);
@@ -423,7 +423,7 @@ export const describeAuthorizeRequest = createServerFn({ method: "POST" })
   });
 
 export const decideAuthorizeRequest = createServerFn({ method: "POST" })
-  .middleware([requireDeveloperAccess])
+  .middleware([requireAuth])
   .inputValidator((data: unknown) =>
     authorizeSchema.extend({ allow: z.boolean(), richIdentityOptIn: z.boolean().optional() }).parse(data),
   )
@@ -529,7 +529,7 @@ export const silentAuthorize = createServerFn({ method: "POST" })
 /* ------------------------------------------------------------ step-up ---- */
 
 export const sendStepUpCode = createServerFn({ method: "POST" })
-  .middleware([requireDeveloperAccess])
+  .middleware([requireAuth])
   .inputValidator((data: unknown) => z.object({ clientId: z.string().min(4).max(120) }).parse(data))
   .handler(async ({ data, context }) => {
     const { getClientByClientId, createStepUpCode } = await import("./provider.server");
@@ -552,7 +552,7 @@ export const sendStepUpCode = createServerFn({ method: "POST" })
   });
 
 export const verifyStepUp = createServerFn({ method: "POST" })
-  .middleware([requireDeveloperAccess])
+  .middleware([requireAuth])
   .inputValidator((data: unknown) =>
     z.object({ clientId: z.string().min(4).max(120), code: z.string().regex(/^\d{6}$/) }).parse(data),
   )
