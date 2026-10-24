@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Volledige hercontrole nieuwe briefings 2026-10-24: veiligheid, één-pagina-wisselaar, OAuth-scope/redirects, profielprivacy en alle tests; live sessies/DNS/e-mail en echte migraties alleen met controleerbare toegang en expliciet wijzigingsakkoord.
 - [x] Vervolg 2026-10-24: Studio-tabbladen transparant met actieve pil; één instellingenknop naast Knopvorm en Typografie, zonder dubbele labels.
 - [ ] Vervolgcontrole Studio-tabbladen en inline instellingen — echte ROUT-sessie nodig voor ingelogde browsercontrole.
 - [ ] Aanvullingen 2026-10-24: Vercel als uitvoeringsdoel; alleen noodzakelijke sleutels opvragen; profielhub-knoppen en achtergrondafhankelijke kaders/berichten verfijnen; Explore-avatarfouten; privé-alias-preview genereren; Press & brand kit met officiële Login/Connect ROUT-code; developer-console en veilige integratieprompts verbeteren; eerste-gebruik-rondleidingen voor profielkeuze, Studio en dashboard; custom domains voor zowel shortlinks als profielhubs. Sleutelrotatie bevestigd.
