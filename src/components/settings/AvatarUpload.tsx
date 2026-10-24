@@ -6,6 +6,7 @@ import { uploadAvatar } from "@/lib/avatar.functions";
 import { useI18n } from "@/lib/i18n";
 import { compressImageToWebP } from "@/lib/image-compression";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -24,6 +25,7 @@ interface Props {
  */
 export function AvatarUpload({ value, name, onChange }: Props) {
   const { t } = useI18n();
+  const upload = useServerFn(uploadAvatar);
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 
@@ -51,7 +53,7 @@ export function AvatarUpload({ value, name, onChange }: Props) {
         reader.readAsDataURL(blob);
       });
 
-      const result = await uploadAvatar({ data: { base64, contentType } });
+      const result = await upload({ data: { base64, contentType } });
       if (!result.ok || !result.url) throw new Error(result.message ?? t("avatar.err.upload"));
 
       onChange(result.url);

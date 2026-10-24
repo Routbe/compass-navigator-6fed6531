@@ -71,7 +71,8 @@
 - `SCALEWAY_ENDPOINT` — Scaleway Object Storage.
 - `SCALEWAY_REGION` — Scaleway Object Storage.
 - `SCALEWAY_DEFAULT_BUCKET` — Scaleway Object Storage.
-- `BUCKET_ENV` — Scaleway Object Storage.
+- `SCALEWAY_CLIENT_BUCKET` — Member profile photos and uploaded media.
+- `SCALEWAY_INTERNAL_BUCKET` — ROUT-owned assets; never member uploads.
 
 ## Email
 

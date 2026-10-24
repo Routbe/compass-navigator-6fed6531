@@ -1,5 +1,6 @@
 ## Payments & badges rules
 - First-use tours store authenticated, per-area completion in profiles.display_prefs.firstUseTours; no browser storage or auto-auth is involved. Why: guidance follows the member across devices without changing login behavior.
+- Root and alias profile saves share profile-image-url.ts for image validation, allowing only the exact first-party avatar fallback among relative URLs. Why: uploaded photos must persist without accepting arbitrary application paths.
 - profile-surface.ts derives automatic card, border and text roles from the selected solid canvas; explicit user colors remain overrides. Why: frames and messages must not inherit an incompatible old preset.
 - Tip pages never move money through ROUT: EPC/SEPA QR + text IBAN is the always-on default; optional creator-owned PSP keys (Stripe/Mollie) live only AES-GCM encrypted in `psp_credentials` (db/58, `crypto/secretbox.server.ts`, `PSP_ENCRYPTION_KEY`) and are decrypted only inside `startPspTip`. Why: zero platform liability and no plaintext third-party secrets.
 - Tip settings/PSP access requires a verified account with a root handle, checked in every `tip-page.server.ts` entry point; the IBAN holder must match the verified legal (or approved business) name. Why: prevents fraud via free aliases.
