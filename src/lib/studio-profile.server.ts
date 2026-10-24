@@ -259,6 +259,9 @@ export async function readPublicProfile(rawHandle: string) {
          and (lower(username) = ${username}
               or lower(coalesce(subdomain_alias, '')) = ${username})
          and coalesce(is_banned, false) = false
+         and coalesce(is_suspended, false) = false
+         and coalesce(status, 'active') not in ('frozen', 'banned', 'suspended')
+         and coalesce((to_jsonb(profiles)->'display_prefs'->>'publicProfile')::boolean, true)
        order by (lower(username) = ${username}) desc
        limit 1
     `) as Row[];
@@ -269,10 +272,15 @@ export async function readPublicProfile(rawHandle: string) {
     console.warn("[public-profile:fallback]", username, error);
     rows = (await sql`
       select id, username, display_name, tagline, avatar_url, theme, card_style,
-             blocks, verified, created_at
+             blocks, verified, created_at,
+             to_jsonb(profiles)->'display_prefs' as display_prefs
         from public.profiles
        where lower(username) = ${username}
          and coalesce(verified, false) = true
+         and coalesce((to_jsonb(profiles)->>'is_banned')::boolean, false) = false
+         and coalesce((to_jsonb(profiles)->>'is_suspended')::boolean, false) = false
+         and coalesce(to_jsonb(profiles)->>'status', 'active') not in ('frozen', 'banned', 'suspended')
+         and coalesce((to_jsonb(profiles)->'display_prefs'->>'publicProfile')::boolean, true)
        limit 1
     `) as Row[];
   }
@@ -283,6 +291,7 @@ export async function readPublicProfile(rawHandle: string) {
   {
     const { parseDisplayPrefs } = await import("./profile-display");
     const prefs = parseDisplayPrefs(profile["display_prefs"]);
+    if (!prefs.publicProfile) return null;
     const approved = profile["is_business"] === true || profile["is_influencer"] === true;
     if (!approved && ((prefs.badgeType !== "verified" && prefs.badgeType !== "domain") || !prefs.badgeVisible)) {
       profile["verified_legal_name"] = null;

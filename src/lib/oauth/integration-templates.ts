@@ -125,8 +125,8 @@ export function buildAiPrompt(app: TemplateApp, tool: AiTool, stack: Stack): str
   }
   if (app.accountDiscoveryEnabled) {
     lines.push(
-      "- Account Auto-Discovery is enabled: when a ROUT login arrives with a verified email that matches an existing user, LINK it to that user (insert into `user_identities` with provider='rout') instead of creating a duplicate. Only merge when email_verified is true.",
-      "- Do not initiate silent sign-in automatically. If the user explicitly requests it later, support `prompt=none` as a separate opt-in and handle `login_required` without redirect loops.",
+      "- Account Discovery is enabled: after a user-initiated authorization and verified callback, offer linking when email_verified is true and the email matches an existing local account. Require an authenticated local session, explicit consent and conflict checks; never merge solely because emails match.",
+      "- Authorization always requires an explicit button click or form submission. Do not implement silent sign-in or automatic redirects for account discovery.",
     );
   }
   lines.push(...brandingSection());

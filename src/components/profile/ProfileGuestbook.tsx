@@ -16,6 +16,7 @@ const MESSAGES: Record<string, string> = {
   not_found: "Dit profiel neemt geen berichten aan.",
   own_profile: "Je kan niet op je eigen prikbord schrijven.",
   too_many: "Even rustig aan — probeer het straks opnieuw.",
+  not_verified: "Alleen geverifieerde ROUT-leden kunnen een bericht achterlaten.",
 };
 
 /** Prikbord: pinned notes for everyone, a note form for signed-in members. */

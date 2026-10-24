@@ -12,6 +12,12 @@ const app = {
 };
 
 describe("integration templates", () => {
+  it("account discovery never enables silent login or automatic account merging", () => {
+    const prompt = buildAiPrompt({ ...app, accountDiscoveryEnabled: true }, "generic", "tanstack");
+    expect(prompt).not.toContain("prompt=none");
+    expect(prompt).toContain("Require an authenticated local session, explicit consent and conflict checks");
+    expect(prompt).toContain("never merge solely because emails match");
+  });
   it("injects client id, discovery url and scopes, never a secret", () => {
     const p = buildAiPrompt(app, "cursor", "nextjs");
     expect(p).toContain("rout_abc");

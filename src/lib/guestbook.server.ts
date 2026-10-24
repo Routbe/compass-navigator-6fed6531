@@ -19,7 +19,10 @@ async function publicOwnerId(handle: string): Promise<string | null> {
   const rows = (await sql`select id from public.profiles
      where lower(username) = lower(${handle})
        and coalesce((display_prefs ->> 'publicProfile')::boolean, true)
-       and coalesce((display_prefs ->> 'guestbookEnabled')::boolean, true) limit 1`) as Row[];
+       and coalesce((display_prefs ->> 'guestbookEnabled')::boolean, true)
+       and coalesce(is_banned, false) = false
+       and coalesce(is_suspended, false) = false
+       and coalesce(status, 'active') not in ('frozen', 'banned', 'suspended') limit 1`) as Row[];
   return rows[0] ? String(rows[0]["id"]) : null;
 }
 
@@ -32,9 +35,15 @@ export async function pinnedNotes(handle: string): Promise<GuestbookNote[]> {
   return rows.map(toNote);
 }
 
-export async function postNote(authorId: string, handle: string, raw: string): Promise<"ok" | "invalid" | "not_found" | "own_profile" | "too_many"> {
+export async function postNote(authorId: string, handle: string, raw: string): Promise<"ok" | "invalid" | "not_found" | "own_profile" | "too_many" | "not_verified"> {
   const body = normalizeNote(raw);
   if (!body) return "invalid";
+  const authors = (await sql`select id from public.profiles
+    where id = ${authorId} and verified = true
+      and coalesce(is_banned, false) = false
+      and coalesce(is_suspended, false) = false
+      and coalesce(status, 'active') not in ('frozen', 'banned', 'suspended') limit 1`) as Row[];
+  if (!authors[0]) return "not_verified";
   const owner = await publicOwnerId(handle);
   if (!owner) return "not_found";
   if (owner === authorId) return "own_profile";

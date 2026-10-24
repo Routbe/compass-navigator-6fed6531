@@ -2,6 +2,7 @@ import { normalizeLayersPref } from "./profile-display";
 import { createServerFn } from "@tanstack/react-start";
 import { requireAuth } from "@/lib/auth/middleware";
 import { z } from "zod";
+import { optionalProfileImageUrlSchema } from "./profile-image-url";
 
 /**
  * RPC-laag voor het gratis aliasprofiel (`rout.be/u/<handle>`), dat volledig
@@ -78,13 +79,7 @@ const jsonValueSchema = z.union([
   z.null(),
 ]);
 const jsonRecordSchema = z.record(z.string(), z.union([jsonValueSchema, z.array(jsonValueSchema).max(100)]));
-const optionalUrlSchema = z
-  .string()
-  .trim()
-  .max(2_000)
-  .refine((value) => !value || value.startsWith("https://") || value.startsWith("data:image/"), "invalid_url")
-  .nullable()
-  .optional();
+const optionalUrlSchema = optionalProfileImageUrlSchema;
 const saveAliasProfileSchema = z.strictObject({
   username: z.string().trim().min(1).max(60),
   displayName: z.string().trim().max(120).nullable().optional(),

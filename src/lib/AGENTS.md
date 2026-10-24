@@ -1,5 +1,6 @@
 ## Payments & badges rules
 - First-use tours store authenticated, per-area completion in profiles.display_prefs.firstUseTours; no browser storage or auto-auth is involved. Why: guidance follows the member across devices without changing login behavior.
+- Root and alias profile saves share profile-image-url.ts for image validation, allowing only the exact first-party avatar fallback among relative URLs. Why: uploaded photos must persist without accepting arbitrary application paths.
 - profile-surface.ts derives automatic card, border and text roles from the selected solid canvas; explicit user colors remain overrides. Why: frames and messages must not inherit an incompatible old preset.
 - Tip pages never move money through ROUT: EPC/SEPA QR + text IBAN is the always-on default; optional creator-owned PSP keys (Stripe/Mollie) live only AES-GCM encrypted in `psp_credentials` (db/58, `crypto/secretbox.server.ts`, `PSP_ENCRYPTION_KEY`) and are decrypted only inside `startPspTip`. Why: zero platform liability and no plaintext third-party secrets.
 - Tip settings/PSP access requires a verified account with a root handle, checked in every `tip-page.server.ts` entry point; the IBAN holder must match the verified legal (or approved business) name. Why: prevents fraud via free aliases.
@@ -22,7 +23,7 @@
 - Total reach is summed only from Connections Hub rows (`user_integrations`, db/74): open platforms auto-fetch, others use a per-integration manual count; never social_links or placeholders. Why: the number must reflect what the member actually connected.
 - YouTube vault (`youtube.server.ts`, db/95) reuses the Google client keys in a separate OAuth flow (youtube.readonly, offline) and seals tokens on the `user_integrations` 'youtube' row; failed refresh sets `connection_status='disconnected'`, disconnect revokes and deletes the row, visitors read only the cached card via `/api/public/youtube/card`. Why: Better Auth sign-in stays untouched and tokens never leave the server.
 
-- Guestbook (`guestbook.server.ts`, db/90): only signed-in members post, owners pin/delete via `owner_id` checks, public reads return pinned notes of public profiles only. Why: verified network effect, no spam, privacy enforced server-side.
+- Guestbook (`guestbook.server.ts`, db/90): only signed-in verified, unblocked members post, owners pin/delete via `owner_id` checks, public reads return pinned notes of public profiles only. Why: verified network effect, no spam, privacy enforced server-side.
 - Admin gifts share gift-issue-rules, activate atomically and resolve recipient email server-side; mail status comes from the central sender. Why: preserve checkout value and recipient privacy without false delivery claims.
 
 - Creator payment keys: Stripe accepts only restricted keys (`checkStripeKey` in `tip-rules.ts`, enforced in `savePsp`), sealed with secretbox, decrypted only inside the payment handler. Why: a leaked full secret key would expose the creator's whole Stripe account.
