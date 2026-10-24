@@ -22,7 +22,7 @@
 - Total reach is summed only from Connections Hub rows (`user_integrations`, db/74): open platforms auto-fetch, others use a per-integration manual count; never social_links or placeholders. Why: the number must reflect what the member actually connected.
 - YouTube vault (`youtube.server.ts`, db/95) reuses the Google client keys in a separate OAuth flow (youtube.readonly, offline) and seals tokens on the `user_integrations` 'youtube' row; failed refresh sets `connection_status='disconnected'`, disconnect revokes and deletes the row, visitors read only the cached card via `/api/public/youtube/card`. Why: Better Auth sign-in stays untouched and tokens never leave the server.
 
-- Guestbook (`guestbook.server.ts`, db/90): only signed-in members post, owners pin/delete via `owner_id` checks, public reads return pinned notes of public profiles only. Why: verified network effect, no spam, privacy enforced server-side.
+- Guestbook (`guestbook.server.ts`, db/90): only signed-in verified, unblocked members post, owners pin/delete via `owner_id` checks, public reads return pinned notes of public profiles only. Why: verified network effect, no spam, privacy enforced server-side.
 - Admin gifts share gift-issue-rules, activate atomically and resolve recipient email server-side; mail status comes from the central sender. Why: preserve checkout value and recipient privacy without false delivery claims.
 
 - Creator payment keys: Stripe accepts only restricted keys (`checkStripeKey` in `tip-rules.ts`, enforced in `savePsp`), sealed with secretbox, decrypted only inside the payment handler. Why: a leaked full secret key would expose the creator's whole Stripe account.

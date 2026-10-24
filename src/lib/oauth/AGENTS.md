@@ -1,5 +1,6 @@
 ## OAuth provider rules
 - Integration examples share button-kit.ts; authorization is user-initiated and unavailable APIs must remain disabled. Why: generated instructions must not activate unimplemented login or issuance paths.
+- Account-discovery prompts prohibit silent login and email-only merging; linking requires an existing local session, consent and conflict checks. Why: discovering matching data is not authorization to take over an account.
 - OAuth client console settings (publishing status, PKCE, token TTL, IP allowlist, account discovery) are enforced in `provider.server.ts`/`console.functions.ts` (this folder) server-side, never only in the UI. Why: the console is the developer's control plane; the OIDC endpoints are the security boundary.
 - New OAuth client secrets are stored as `v2$` peppered SHA-256 (`client-secret.ts`), legacy plain hashes stay valid until rotated. Why: no forced re-issue for existing apps.
 - `rout_handle` is shared only when the app enabled Universal Handle Sync (`handle_sync_enabled`, db/67) and `profile` was granted (`routHandleClaim`). Why: apps must opt into identity data.

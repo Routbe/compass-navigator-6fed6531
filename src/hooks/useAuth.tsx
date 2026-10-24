@@ -6,6 +6,7 @@ import { authClient } from "@/lib/auth-client";
 import { syncSignupProfile } from "@/lib/signup-profile.functions";
 import { claimReferral } from "@/lib/referral.functions";
 import { clearReferrer, readReferrer } from "@/lib/referral";
+import { withAuthTimeout, AUTH_GUARD_TIMEOUT_MS } from "@/lib/auth-timeout";
 
 /**
  * Session state for ROUT's self-hosted Better Auth layer.
@@ -71,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     try {
-      const next = await getSessionUser();
+      const next = await withAuthTimeout(getSessionUser(), "session", AUTH_GUARD_TIMEOUT_MS);
       setUser(next);
       setAvailable(true);
       if (next) void flushPostSignIn(next);
