@@ -211,7 +211,10 @@ export async function writeStudioProfile(userId: string, input: StudioProfileInp
     try {
       const saved = (await sql`
         update public.profiles
-           set display_prefs = ${JSON.stringify(input.displayPrefs)}::jsonb
+           set display_prefs = (${JSON.stringify(input.displayPrefs)}::jsonb - 'firstUseTours')
+             || case when display_prefs ? 'firstUseTours'
+                     then jsonb_build_object('firstUseTours', display_prefs->'firstUseTours')
+                     else '{}'::jsonb end
          where id = ${userId}
         returning display_prefs
       `) as Row[];
