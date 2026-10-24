@@ -54,3 +54,15 @@
 - [ ] Fase 3: console persoonlijk/workspace scope, app overdragen, onboarding-keuze
 - [ ] Fase 4: Anonieme vragen + Gastenboek, badges naast naam, showcase 1-op-1
 - [ ] Fase 5: admin handles/curatie, subdomein-tiers + fallback, badge/workspace-mails
+
+## Briefings 2026-10-24 (2 uploads)
+- [x] Tours: profile save keeps display_prefs.firstUseTours (server-side merge)
+- [ ] Custom domains for profile hubs (DNS instructions, live status, host routing)
+- [ ] Profile hub + dashboard tours content
+- [ ] Hub buttons contrast, hide page switch with 1 page, drawn Studio tab icons, inline button/typography controls
+- [ ] Console personal/workspace scope + OAuth client transfer; prompt validation (no prompt=none)
+- [ ] Session cleanup after key rotation — needs explicit approval
+- [ ] Anonymous questions stories/visibility; guestbook verified-only + pin/delete
+- [ ] Admin handles, curation, identity correction with audit log
+- [ ] Account preselect on login; subdomain fallback
+- [ ] Issued credentials db/99 + emails — needs approval for database change
