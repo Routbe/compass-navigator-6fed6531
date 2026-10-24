@@ -1,5 +1,6 @@
 # Roadmap
-- [ ] Nieuw 2026-10-24: profielfoto upload in profielhub faalt; oorzaak reproduceren, veilige upload herstellen en ingelogde upload/teruglezen verifiëren.
+- [x] Profielfoto: afwijzing van het uploadadres gereproduceerd en hersteld voor root- en aliasprofielen; 6 regressietests en volledige suite (717 tests) geslaagd.
+- [ ] Profielfoto ingelogd uploaden → opslaan → teruglezen: wacht op een beschikbare ROUT-sessie; geen managed browserlogin beschikbaar.
 - [ ] Volledige hercontrole nieuwe briefings 2026-10-24: veiligheid, één-pagina-wisselaar, OAuth-scope/redirects, profielprivacy en alle tests; live sessies/DNS/e-mail en echte migraties alleen met controleerbare toegang en expliciet wijzigingsakkoord.
 - [x] Vervolg 2026-10-24: Studio-tabbladen transparant met actieve pil; één instellingenknop naast Knopvorm en Typografie, zonder dubbele labels.
 - [ ] Vervolgcontrole Studio-tabbladen en inline instellingen — echte ROUT-sessie nodig voor ingelogde browsercontrole.
