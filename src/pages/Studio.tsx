@@ -57,7 +57,7 @@ export default function Studio() {
       ) : (
         <div className="flex flex-1 flex-col space-y-6 pb-8">
           <FirstUseTour area="studio" userId={user.id} />
-          <div role="tablist" className="flex flex-wrap gap-2 rounded-xl border border-border/60 bg-muted/30 p-1">
+          <div role="tablist" aria-label={t("studio.page.title")} className="flex flex-wrap gap-2 bg-transparent p-1">
             {tabs.map(({ id, label, hint, Icon, locked }) => (
               <Button variant="ghost"
                 key={id}

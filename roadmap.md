@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Vervolg 2026-10-24: Studio-tabbladen transparant met actieve pil; één instellingenknop naast Knopvorm en Typografie, zonder dubbele labels.
+- [ ] Vervolgcontrole Studio-tabbladen en inline instellingen — echte ROUT-sessie nodig voor ingelogde browsercontrole.
 - [ ] Aanvullingen 2026-10-24: Vercel als uitvoeringsdoel; alleen noodzakelijke sleutels opvragen; profielhub-knoppen en achtergrondafhankelijke kaders/berichten verfijnen; Explore-avatarfouten; privé-alias-preview genereren; Press & brand kit met officiële Login/Connect ROUT-code; developer-console en veilige integratieprompts verbeteren; eerste-gebruik-rondleidingen voor profielkeuze, Studio en dashboard; custom domains voor zowel shortlinks als profielhubs. Sleutelrotatie bevestigd.
 - [x] Neon account (management) key saved securely as NEON_MANAGEMENT_API_KEY for branch/project admin
 - [ ] SECURITY: user confirmed all keys rotated on 2026-10-24; check .env exclusion and invalidate existing sessions after explicit approval

@@ -216,7 +216,7 @@ export function DesignTile({
 }
 
 /** Ronde "aanpassen"-knop, dezelfde als bij Achtergrond & Visual FX. */
-function CustomizeButton({ open, onToggle, label, controls }: { open: boolean; onToggle: () => void; label: string; controls: string }) {
+export function CustomizeButton({ open, onToggle, label, controls }: { open: boolean; onToggle: () => void; label: string; controls: string }) {
   return (
     <Button
       type="button"
@@ -498,10 +498,12 @@ export function DesignButtonsTypographySection({
   prefs,
   setPref,
   theme,
+  inlineControls = false,
 }: {
   prefs: ProfileDisplayPrefs;
   setPref: SetPref;
   theme: string;
+  inlineControls?: boolean;
 }) {
   const t = themeOf(theme);
   const preview = (patch: Partial<ProfileDisplayPrefs>) =>
@@ -509,10 +511,10 @@ export function DesignButtonsTypographySection({
   return (
     <div className="space-y-5">
       <section className="space-y-3">
-        <div className="flex min-w-0 items-center gap-2">
+        {!inlineControls && <div className="flex min-w-0 items-center gap-2">
           <p className="input-label">Knopvorm</p>
           <CustomizeButton open={prefs.buttonsCustom} onToggle={() => setPref("buttonsCustom", !prefs.buttonsCustom)} label="Knoppen aanpassen" controls="buttons-advanced" />
-        </div>
+        </div>}
         <CustomCollapse open={prefs.buttonsCustom} id="buttons-advanced">
           <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Knopvorm">
             {([["bar", "Lijn met naam"], ["icon", "Ronde bol (alleen icoon)"]] as const).map(([id, label]) => (
@@ -565,10 +567,10 @@ export function DesignButtonsTypographySection({
       </section>
 
       <section className="space-y-3 border-t border-border pt-4">
-        <div className="flex min-w-0 items-center gap-2">
+        {!inlineControls && <div className="flex min-w-0 items-center gap-2">
           <p className="input-label">Typografie</p>
           <CustomizeButton open={prefs.typographyCustom} onToggle={() => setPref("typographyCustom", !prefs.typographyCustom)} label="Typografie aanpassen" controls="type-advanced" />
-        </div>
+        </div>}
         <CustomCollapse open={prefs.typographyCustom} id="type-advanced">
           <Select value={prefs.fontPairing} onValueChange={(v) => setPref("fontPairing", v as ProfileDisplayPrefs["fontPairing"])}>
             <SelectTrigger className="h-10 text-xs"><SelectValue placeholder="Kies een fontpaar" /></SelectTrigger>

@@ -923,10 +923,11 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
       <div
         role="tablist"
         aria-label="Studio"
-        className="sticky top-14 z-20 flex w-full gap-1 overflow-x-auto rounded-2xl border border-border bg-card/95 p-1 backdrop-blur [scrollbar-width:none] supports-[backdrop-filter]:bg-card/80 [&::-webkit-scrollbar]:hidden"
+        className="sticky top-14 z-20 flex w-full gap-1 overflow-x-auto bg-transparent p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {visibleTabs.map(({ id }) => (
-          <button
+          <Button
+            variant="ghost"
             key={id}
             role="tab"
             type="button"
@@ -934,15 +935,15 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
             title={t(`studio.tab.${id}`)}
             onClick={() => setTab(id)}
             className={cn(
-              "flex h-9 flex-1 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border-0 px-3 text-xs shadow-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "flex h-9 flex-1 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border-0 px-3 text-xs shadow-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               tab === id
-                ? "bg-foreground font-medium text-background"
+                ? "bg-foreground font-medium text-background hover:bg-foreground hover:text-background"
                 : "bg-transparent text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
             )}
           >
             <StudioSectionIcon kind={id === "links" ? "content" : id} className="size-4 text-current" />
             {t(`studio.tab.${id}`)}
-          </button>
+          </Button>
         ))}
       </div>
 

@@ -10,6 +10,7 @@ import { StatusDesignSettings } from "@/components/dashboard/editor/StatusSettin
 import { FaviconUploader } from "@/components/studio/FaviconUploader";
 import { VisitEffectPicker } from "@/components/studio/VisitEffectPicker";
 import {
+  CustomizeButton,
   DesignButtonsTypographySection,
   DesignFooterSection,
   DesignPresetSection,
@@ -194,7 +195,10 @@ export function ProfileThemePicker({
           </span>
         </AccordionTrigger>
         <AccordionContent className="space-y-4 pb-5">
-          <p className="input-label">Knopvorm</p>
+          <div className="flex min-w-0 items-center gap-2">
+            <p className="input-label">Knopvorm</p>
+            <CustomizeButton open={prefs.buttonsCustom} onToggle={() => setPref("buttonsCustom", !prefs.buttonsCustom)} label="Knoppen aanpassen" controls="buttons-advanced" />
+          </div>
           <div className="flex flex-wrap gap-2">
             {CARD_STYLES.map((c) => (
               <button
@@ -210,7 +214,10 @@ export function ProfileThemePicker({
               </button>
             ))}
           </div>
-          <p className="input-label flex items-center gap-1.5 pt-2">Typografie <ProPill /></p>
+          <div className="flex min-w-0 items-center gap-2 pt-2">
+            <p className="input-label flex items-center gap-1.5">Typografie <ProPill /></p>
+            <CustomizeButton open={prefs.typographyCustom} onToggle={() => setPref("typographyCustom", !prefs.typographyCustom)} label="Typografie aanpassen" controls="type-advanced" />
+          </div>
           <div className="flex flex-wrap gap-2">
             {TYPOGRAPHY_STYLES.map((t) => (
               <button
@@ -243,7 +250,7 @@ export function ProfileThemePicker({
             />
           </div>
           <div className="border-t border-border pt-4">
-            <DesignButtonsTypographySection prefs={prefs} setPref={setPref} theme={theme} />
+            <DesignButtonsTypographySection prefs={prefs} setPref={setPref} theme={theme} inlineControls />
           </div>
         </AccordionContent>
       </AccordionItem>
