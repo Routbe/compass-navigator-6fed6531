@@ -1,5 +1,9 @@
 /** Which remote images the privacy proxy may fetch (browser-safe, testable). */
 export const PROXY_HOSTS = [
+  "lh3.googleusercontent.com",
+  "lh4.googleusercontent.com",
+  "lh5.googleusercontent.com",
+  "lh6.googleusercontent.com",
   "i.scdn.co",
   "mosaic.scdn.co",
   "lastfm.freetls.fastly.net",

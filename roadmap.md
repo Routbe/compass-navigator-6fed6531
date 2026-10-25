@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Ontdek 2026-10-25: Google-avatars via privacyproxy hersteld, foto ingebed in PNG én SVG, galerijnaam leesbaar en previewkleuren volgen canvas; 30 tests geslaagd, echt publiek profiel gecontroleerd op desktop/mobiel zonder paginafouten of horizontale overflow.
 - [ ] Vervolg 2026-10-24 09:49: resterende sprinttaken hervatten; loginconsent losmaken van workspace-consoletoegang, rondleidingen afwerken en vraagstories voorbereiden; geen sessieverwijdering of db/99 zonder afzonderlijk akkoord.
 - [x] Profielfoto: afwijzing van het uploadadres gereproduceerd en hersteld voor root- en aliasprofielen; 6 regressietests en volledige suite (717 tests) geslaagd.
 - [ ] Profielfoto ingelogd uploaden → opslaan → teruglezen: wacht op een beschikbare ROUT-sessie; geen managed browserlogin beschikbaar.

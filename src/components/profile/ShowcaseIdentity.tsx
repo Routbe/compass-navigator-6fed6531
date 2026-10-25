@@ -27,7 +27,7 @@ export function ShowcaseAvatar({ card, className = "size-10" }: { card: Showcase
 export function ShowcaseName({ card }: { card: ShowcaseCard }) {
   const p = card.display ?? showcaseDisplay(null);
   const custom = p.typographyCustom || p.customDesign;
-  return <span className="min-w-0 truncate" style={{ ...(custom && p.titleColor ? { color: p.titleColor } : nameAccentStyle(p.nameAccent, themeOf(card.theme ?? ""))), ...(custom ? { fontFamily: fontPairingOf(p.fontPairing).heading, textShadow: p.titleGlow > 0 ? `0 0 ${p.titleGlow}px currentColor` : undefined } : {}) }}>{card.displayName ?? card.handle}</span>;
+  return <span className="min-w-0 truncate" style={{ ...nameAccentStyle(p.nameAccent, { text: "var(--foreground)", accent: "var(--primary)" }), ...(custom ? { fontFamily: fontPairingOf(p.fontPairing).heading, textShadow: p.titleGlow > 0 ? `0 0 ${p.titleGlow}px currentColor` : undefined } : {}) }}>{card.displayName ?? card.handle}</span>;
 }
 
 /** Noninteractive version of the profile mark: cards themselves are links. */
