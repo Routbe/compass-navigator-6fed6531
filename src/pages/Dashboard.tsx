@@ -252,10 +252,10 @@ export default function Dashboard() {
 
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-4">
-          <TabsTrigger value="overview">{t("studio.dashboard.overview")}</TabsTrigger>
-          <TabsTrigger value="qrs">{t("studio.dashboard.qrs")}</TabsTrigger>
-          <TabsTrigger value="links">{t("studio.dashboard.links")}</TabsTrigger>
-          <TabsTrigger value="files">{t("studio.dashboard.files")}</TabsTrigger>
+          <TabsTrigger value="overview" data-tour="dashboard-overview">{t("studio.dashboard.overview")}</TabsTrigger>
+          <TabsTrigger value="qrs" data-tour="dashboard-qrs">{t("studio.dashboard.qrs")}</TabsTrigger>
+          <TabsTrigger value="links" data-tour="dashboard-links">{t("studio.dashboard.links")}</TabsTrigger>
+          <TabsTrigger value="files" data-tour="dashboard-files">{t("studio.dashboard.files")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">

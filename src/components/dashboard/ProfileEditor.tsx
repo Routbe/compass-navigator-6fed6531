@@ -893,6 +893,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
           <Button
             type="button"
             size="sm"
+            data-tour="studio-publish"
             disabled={publishing || discarding || saving || dirty || draftRevision === publishedRevision}
             onClick={() => void publish()}
           >
@@ -931,6 +932,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
             key={id}
             role="tab"
             type="button"
+            data-tour={`studio-tab-${id}`}
             aria-selected={tab === id}
             title={t(`studio.tab.${id}`)}
             onClick={() => setTab(id)}

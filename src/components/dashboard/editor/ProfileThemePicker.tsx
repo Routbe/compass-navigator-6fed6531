@@ -114,7 +114,7 @@ export function ProfileThemePicker({
             />
           </div>
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-border bg-muted/40">
+            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-border">
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Avatar preview" className="h-full w-full object-cover" />
               ) : null}

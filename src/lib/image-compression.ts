@@ -9,6 +9,8 @@ const MAX_DIMENSION = 1000;
 
 /** Compresses a raster image to WebP, shrinking quality until it fits `maxKB`. */
 export async function compressImageToWebP(file: File, maxKB = MAX_IMAGE_KB): Promise<Blob> {
+  // Small PNG/WebP files keep their original bytes, so transparency stays exact.
+  if ((file.type === "image/png" || file.type === "image/webp") && file.size <= maxKB * 1024) return file;
   const dataUrl = await readAsDataUrl(file);
   const img = await loadImage(dataUrl);
 
