@@ -14,12 +14,39 @@ interface State {
   detailsOpen: boolean;
 }
 
+const STALE_RE = /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Loading chunk .* failed/i;
+const RELOAD_KEY = "rout_stale_chunk_reload";
+
+/** After a deploy, old tabs request removed files; reload once to fetch the new version. */
+export function reloadForStaleChunk(error: unknown): boolean {
+  if (typeof window === "undefined") return false;
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  if (!STALE_RE.test(message)) return false;
+  try {
+    const last = Number(window.sessionStorage.getItem(RELOAD_KEY) ?? 0);
+    if (Date.now() - last < 30_000) return false;
+    window.sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+  } catch {
+    return false;
+  }
+  window.location.reload();
+  return true;
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("vite:preloadError", (event) => {
+    if (reloadForStaleChunk((event as Event & { payload?: unknown }).payload ?? new Error("Failed to fetch dynamically imported module"))) event.preventDefault();
+  });
+  window.addEventListener("unhandledrejection", (event) => { reloadForStaleChunk(event.reason); });
+}
+
 export class ErrorBoundary extends Component<Props, State> {
   override state: State = { error: null, info: null, detailsOpen: false };
   static getDerivedStateFromError(error: Error): Partial<State> {
     return { error };
   }
   override componentDidCatch(error: Error, info: ErrorInfo) {
+    if (reloadForStaleChunk(error)) return;
     console.error("[ErrorBoundary]", this.props.label ?? "app", error, info);
     this.setState({ info });
   }
