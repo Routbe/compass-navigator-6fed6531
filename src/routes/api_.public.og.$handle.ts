@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { parseDisplayPrefs } from "@/lib/profile-display";
 import { ogSvg, type OgBadge, type OgAvatarShape } from "@/lib/og-card";
 import { themeOf } from "@/lib/profile";
+import { profileSurface } from "@/lib/profile-surface";
 import { fontPairingOf } from "@/lib/profile-design";
 import { ogHeadingFont } from "@/lib/og-fonts";
 import { sanitizeHandleInput } from "@/lib/validations/sanitizeHandle";
@@ -51,7 +52,7 @@ export const Route = createFileRoute("/api_/public/og/$handle")({
             tagline;
           verified = Boolean(row["verified"]);
           // Studio-ontwerp: thema + eigen canvas/patroon, kopfont, avatarvorm, badge.
-          const t = themeOf(String(row["theme"] ?? ""));
+          const t = profileSurface(themeOf(String(row["theme"] ?? "")), prefs.canvasColor);
           const p = prefs as typeof prefs & Record<string, unknown>;
           const custom = Boolean(p["typographyCustom"] || p["customDesign"]);
           accent = prefs.accentColor ?? (p["patternColor"] as string | null) ?? t.accent ?? accent;
@@ -87,14 +88,18 @@ export const Route = createFileRoute("/api_/public/og/$handle")({
           // Database onbereikbaar: toon de generieke ROUT-kaart.
         }
 
-        const cache = "public, max-age=1800, s-maxage=86400";
+        const cache = "public, max-age=300, s-maxage=1800";
+        const origin = new URL(request.url).origin;
+        const { fetchImageAsDataUri } = await import("@/lib/og-render.server");
+        // SVG loaded as an <img> cannot fetch nested remote images either.
+        // Both formats therefore use the same first-party/proxied inline photo.
+        const inlineAvatar = avatarUrl ? await fetchImageAsDataUri(avatarUrl, origin) : null;
 
         if (!wantsSvg) {
           try {
-            const { svgToPng, fetchImageAsDataUri } = await import("@/lib/og-render.server");
+            const { svgToPng } = await import("@/lib/og-render.server");
             // resvg haalt zelf geen externe afbeeldingen op: de avatar moet
             // als data-URI in de vector zitten voor we rasteriseren.
-            const inlineAvatar = avatarUrl ? await fetchImageAsDataUri(avatarUrl, new URL(request.url).origin) : null;
             const png = await svgToPng(
               ogSvg({
                 handle,
@@ -125,7 +130,7 @@ export const Route = createFileRoute("/api_/public/og/$handle")({
           accent,
           ...design,
           bg: String(design.bg),
-          avatarUrl: null,
+          avatarUrl: inlineAvatar,
           ...(urlLabel ? { urlLabel } : {}),
         });
 

@@ -7,6 +7,7 @@ import type { ShowcaseCard } from "@/lib/showcase.functions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ShowcaseAvatar, ShowcaseMark, ShowcaseName } from "@/components/profile/ShowcaseIdentity";
+import { profilePreviewPath } from "@/lib/profile-preview";
 
 /** Bento layout: first card large, then a repeating wide/square rhythm. */
 const SPAN = ["sm:col-span-2 sm:row-span-2", "", "", "sm:col-span-2", "", "sm:row-span-2", "", "sm:col-span-2"];
@@ -86,7 +87,7 @@ export function ExploreGallery({ cards, filters = false }: { cards: ShowcaseCard
             >
               <div className="relative aspect-[1200/630] w-full overflow-hidden rounded-2xl border border-border/60 bg-muted">
                 <img
-                  src={`/api/public/og/${encodeURIComponent(c.handle)}.png`}
+                  src={profilePreviewPath(c.handle)}
                   alt={t("explore.preview", { name: c.displayName ?? c.handle })}
                   loading="lazy"
                   width={1200}
@@ -96,7 +97,7 @@ export function ExploreGallery({ cards, filters = false }: { cards: ShowcaseCard
                     const image = event.currentTarget;
                     if (!image.dataset.fallback) {
                       image.dataset.fallback = "svg";
-                      image.src = `/api/public/og/${encodeURIComponent(c.handle)}.svg`;
+                      image.src = profilePreviewPath(c.handle, "root", "svg");
                     } else {
                       image.style.display = "none";
                     }

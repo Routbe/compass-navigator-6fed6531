@@ -2,6 +2,14 @@ import { describe, expect, it } from "vitest";
 import { isAllowedProxyUrl, proxied, profileImageSrc } from "./image-proxy-rules";
 
 describe("image proxy allowlist", () => {
+  it("routes Google member photos through ROUT", () => {
+    const url = "https://lh3.googleusercontent.com/a/member=s96-c";
+    expect(profileImageSrc(url)).toBe(`/api/public/proxy-image?url=${encodeURIComponent(url)}`);
+  });
+  it("refuses Google photo host lookalikes", () => {
+    expect(profileImageSrc("https://lh3.googleusercontent.com.evil.example/a/member")).toBeNull();
+    expect(profileImageSrc("https://evil.googleusercontent.com/a/member")).toBeNull();
+  });
   it("allows a known image host over https", () => expect(isAllowedProxyUrl("https://i.ytimg.com/vi/x/mqdefault.jpg")).not.toBeNull());
   it("refuses plain http", () => expect(isAllowedProxyUrl("http://i.ytimg.com/a.jpg")).toBeNull());
   it("refuses unknown hosts", () => expect(isAllowedProxyUrl("https://evil.example/a.jpg")).toBeNull());
