@@ -115,7 +115,7 @@ import { MAX_FAVORITES } from "@/lib/favorites";
 import { ProfileView } from "@/components/profile/ProfileView";
 import { LayerStudioAccordion } from "@/components/studio/LayerStudioAccordion";
 import { TipPagePanel } from "@/components/dashboard/TipPagePanel";
-import { StudioModeSwitcher } from "@/components/dashboard/StudioModeSwitcher";
+import { ProfileQrCard } from "@/components/dashboard/ProfileQrCard";
 import {
   checkStudioHandle,
   getStudioAnalytics,
@@ -149,7 +149,7 @@ export type ProfileVariant = "verified" | "alias";
  * Four fixed tabs (links, design, analytics, settings) with a live mobile
  * preview alongside, fully decoupled from the QR generator.
  */
-export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVariant } = {}) {
+export function ProfileEditor({ variant = "verified", pageMode = "profile", onPagesChange }: { variant?: ProfileVariant; pageMode?: "profile" | "tip"; onPagesChange?: (pages: { tipEnabled: boolean; handle: string }) => void } = {}) {
   const { t } = useI18n();
   const { user } = useAuth();
   const { style: rawUrlStyle, save: saveUrlStylePref } = useUrlStyle();
@@ -165,7 +165,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
   const loadAnalytics = useServerFn(getStudioAnalytics);
   const [tab, setTab] = useState<StudioTab>("links");
   /** Studio-modus: het profiel zelf of de steunpagina (rout.be/<handle>/tip). */
-  const [editMode, setEditMode] = useState<"profile" | "tip">("profile");
+  const editMode = pageMode;
   const [tipEnabled, setTipEnabled] = useState(false);
   const loadTipSetup = useServerFn(getMyTipSetup);
   // Welke accordion open staat op het tabblad "Settings & verified" — de
@@ -403,6 +403,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
     prefer: alias ? "alias" : "root",
   });
   const publicPath = live.path ?? styledProfilePath(claimed ?? "", urlStyle);
+  useEffect(() => { onPagesChange?.({ tipEnabled: !alias && verified && tipEnabled, handle: normalized }); }, [alias, verified, tipEnabled, normalized, onPagesChange]);
 
   const visibleTabs = useMemo(() => TABS.filter((t) => !t.verifiedOnly || verified), [verified]);
   // Losing verification (or loading it late) must never leave the studio on a
@@ -810,7 +811,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
             {verified ? "Pro" : "Free"}
           </span>
           <ShareMenu
-            url={typeof window === "undefined" ? `https://rout.be${publicPath}` : new URL(publicPath, window.location.origin).toString()}
+            url={`https://rout.be${styledProfilePath(claimed ?? normalized, urlStyle)}`}
             handle={claimed ?? ""}
             name={displayName}
             bio={tagline}
@@ -902,10 +903,6 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
           </Button>
         </div>
       </div>
-
-      {!alias && verified && (
-        <StudioModeSwitcher mode={editMode} onChange={setEditMode} handle={normalized || "handle"} enabled={tipEnabled} />
-      )}
 
       {editMode === "tip" && !alias && verified ? (
         <div className="mt-4 grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
@@ -1040,19 +1037,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                   <span className="flex min-w-0 items-center gap-2 text-base font-medium"><StudioSectionIcon kind="settings" />{t("studio.editor.privacySharing")}</span>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-4 pb-5">
-                  {/* Eén bron van waarheid: QR-styling gebeurt in de generator. */}
-                  <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
-                    <h2 className="text-lg font-medium">{t("studio.editor.qr")}</h2>
-                    <p className="text-sm text-muted-foreground">
-                      {t("studio.editor.qrHelp")}
-                    </p>
-                    <a
-                      href="/qr?type=profile_hub"
-                      className="inline-flex h-9 items-center gap-2 rounded-xl bg-foreground px-3 text-xs font-medium text-background transition-opacity hover:opacity-90"
-                    >
-                      <QrCode className="h-3.5 w-3.5" aria-hidden /> {t("studio.editor.qrDownload")}
-                    </a>
-                  </section>
+                  <ProfileQrCard handle={claimed ?? normalized} urlStyle={urlStyle} value={prefs.qrSettings} onChange={next => setPref("qrSettings", next)} />
 
                 {/* 🔒 Privacy & Openbaar Profiel */}
                 <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">

@@ -2,17 +2,18 @@ import { useTranslation } from "react-i18next";
 import { BrandLoader } from "@/components/BrandLoader";
 import { FirstUseTour } from "@/components/onboarding/FirstUseTour";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "@/lib/router-compat";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProfileEditor, type ProfileVariant } from "@/components/dashboard/ProfileEditor";
-import { BadgeCheck, Lock, Sparkles } from "lucide-react";
+import { BadgeCheck, Lock, Sparkles, HeartHandshake, ChevronDown, Check } from "lucide-react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useAuth } from "@/hooks/useAuth";
 import { getVerificationState } from "@/lib/verification.functions";
 import { verifiedTabUnlocked } from "@/lib/studio-access";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { VerificationPanel } from "@/components/dashboard/VerificationPanel";
 
 /** /studio — the dedicated Profile Hub (link-in-bio) workspace. */
@@ -22,6 +23,9 @@ export default function Studio() {
   const nav = useNavigate();
   // Privacy Alias is the default; the verified profile is a premium tab.
   const [variant, setVariant] = useState<ProfileVariant>("alias");
+  const [pageMode, setPageMode] = useState<"profile" | "tip">("profile");
+  const [pages, setPages] = useState({ tipEnabled: false, handle: "" });
+  const updatePages = useCallback((next: { tipEnabled: boolean; handle: string }) => setPages(next), []);
   const fetchState = useServerFn(getVerificationState);
   const state = useQuery({
     queryKey: ["verification-state", user?.id],
@@ -57,28 +61,22 @@ export default function Studio() {
       ) : (
         <div className="flex flex-1 flex-col space-y-6 pb-8">
           <FirstUseTour area="studio" userId={user.id} />
-          <div role="tablist" aria-label={t("studio.page.title")} data-tour="studio-pages" className="flex flex-wrap gap-2 bg-transparent p-1">
-            {tabs.map(({ id, label, hint, Icon, locked }) => (
-              <Button variant="ghost"
-                key={id}
-                type="button"
-                role="tab"
-                onClick={() => setVariant(id)}
-                aria-selected={variant === id}
-                className={`flex h-auto min-h-12 flex-1 items-center justify-start gap-2 whitespace-normal rounded-lg px-3 py-2 text-left text-sm shadow-none transition ${
-                  variant === id
-                    ? "bg-foreground text-background hover:bg-foreground hover:text-background"
-                    : "bg-transparent text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
-                }`}
-              >
-                <Icon className="h-4 w-4 shrink-0" aria-hidden />
-                <span className="flex flex-col leading-tight">
-                  <span className="font-medium">{label}</span>
-                  <span className="text-xs opacity-70">{hint}</span>
-                </span>
-                {locked && <Lock className="ml-auto h-3.5 w-3.5 opacity-70" aria-label={t("studio.common.locked")} />}
-              </Button>
-            ))}
+          <div data-tour="studio-pages" className="flex flex-wrap gap-2 bg-transparent p-1">
+            {tabs.map(({ id, label, hint, Icon, locked }) => {
+              const selected = variant === id;
+              const select = () => { setVariant(id); setPageMode("profile"); };
+              const trigger = <Button variant="ghost" type="button" aria-pressed={selected} onClick={select} className={`h-auto min-h-12 min-w-0 flex-1 justify-start gap-2 whitespace-normal rounded-lg px-3 py-2 text-left shadow-none ${selected ? "bg-foreground text-background hover:bg-foreground hover:text-background" : "bg-transparent text-muted-foreground hover:bg-secondary/60 hover:text-foreground"}`}>
+                {selected && pageMode === "tip" ? <HeartHandshake className="size-4 shrink-0" /> : <Icon className="size-4 shrink-0" />}
+                <span className="min-w-0 flex-1"><span className="block text-sm font-medium">{selected && pageMode === "tip" ? t("studio.mode.tip") : label}</span><span className="block break-all font-mono text-xs opacity-70">{selected && pages.handle ? `rout.be/${id === "alias" ? "u/" : ""}${pages.handle}${pageMode === "tip" ? "/tip" : ""}` : hint}</span></span>
+                {locked && <Lock className="size-3.5 shrink-0" aria-label={t("studio.common.locked")} />}
+              </Button>;
+              if (!selected || id !== "verified" || (!pages.tipEnabled && pageMode !== "tip")) return <div key={id} className="flex min-w-0 flex-1">{trigger}</div>;
+              return <DropdownMenu key={id}><DropdownMenuTrigger asChild><Button variant="ghost" aria-label={t("studio.mode.pages")} className="h-auto min-h-12 min-w-0 flex-1 justify-start gap-2 whitespace-normal rounded-lg bg-foreground px-3 py-2 text-left text-background hover:bg-foreground hover:text-background">
+                {pageMode === "tip" ? <HeartHandshake className="size-4 shrink-0" /> : <Icon className="size-4 shrink-0" />}<span className="min-w-0 flex-1"><span className="block text-sm font-medium">{pageMode === "tip" ? t("studio.mode.tip") : label}</span><span className="block break-all font-mono text-xs opacity-70">rout.be/{pages.handle}{pageMode === "tip" ? "/tip" : ""}</span></span><ChevronDown className="size-4 shrink-0" />
+              </Button></DropdownMenuTrigger><DropdownMenuContent align="start" className="w-72 max-w-[calc(100vw-24px)]">
+                {(["profile", "tip"] as const).filter(mode => mode === "profile" || pages.tipEnabled).map(mode => <DropdownMenuItem key={mode} onSelect={() => setPageMode(mode)}>{mode === "profile" ? <BadgeCheck className="size-4" /> : <HeartHandshake className="size-4" />}<span className="flex-1">{t(`studio.mode.${mode}`)}</span>{pageMode === mode && <Check className="size-4" />}</DropdownMenuItem>)}
+              </DropdownMenuContent></DropdownMenu>;
+            })}
           </div>
           <ErrorBoundary label={t("studio.page.title")} inline>
             {variant === "verified" && !unlocked ? (
@@ -88,7 +86,7 @@ export default function Studio() {
                 <LockedVerifiedTab />
               )
             ) : (
-              <ProfileEditor key={variant} variant={variant} />
+              <ProfileEditor key={variant} variant={variant} pageMode={pageMode} onPagesChange={updatePages} />
             )}
           </ErrorBoundary>
         </div>
