@@ -22,7 +22,7 @@ export function FirstUseTour({ area, userId }: { area: "studio" | "dashboard"; u
     <Button variant="ghost" size="sm" onClick={() => setOpen(true)} className="mb-3 gap-2"><CircleHelp />{t("studio.tour.restart")}</Button>
     {open && <AnchoredTour onDone={finish} labels={{ skip: t("studio.tour.skip"), back: t("studio.tour.back"), next: t("studio.tour.next"), done: t("studio.tour.done") }} steps={steps.map(id => ({
       title: t(`studio.tour.${area}.${id}.title`), body: t(`studio.tour.${area}.${id}.body`),
-      target: `[data-tour="${area === "dashboard" ? `dashboard-${id}` : id === "content" ? "studio-tab-links" : id === "design" ? "studio-tab-design" : `studio-${id}`} "]`.replace(' "', '"'),
+      target: `[data-tour="${area === "dashboard" ? `dashboard-${id}` : id === "content" ? "studio-tab-links" : id === "design" ? "studio-tab-design" : `studio-${id}`}"]`,
       activate: area === "dashboard" || id === "content" || id === "design",
     }))} />}
   </>;

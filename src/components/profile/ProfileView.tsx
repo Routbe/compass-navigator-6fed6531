@@ -318,7 +318,7 @@ export function ProfileView({
       {profile.username && (
         <div className="absolute right-4 top-4 z-10">
           <ShareMenu
-            url={typeof window === "undefined" ? `https://rout.be/${profile.username}` : window.location.origin + window.location.pathname}
+            url={`https://rout.be/${free ? "u/" : ""}${profile.username}`}
             handle={profile.username}
             name={profile.display_name ?? ""}
             bio={shownBio || profile.tagline}

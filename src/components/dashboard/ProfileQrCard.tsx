@@ -1,213 +1,61 @@
-import { useMemo, useRef, useState } from "react";
-import { Download, FileText, ImageIcon, QrCode, RotateCcw } from "lucide-react";
-import { toast } from "sonner";
+import { useEffect, useState } from "react";
+import { Download, RotateCcw, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import {
-  CORNER_STYLES,
-  DEFAULT_PROFILE_QR_STYLE,
-  profileQrPdf,
-  profileQrSvg,
-  type ProfileQrStyle,
-  type QrCornerStyle,
-} from "@/lib/profile-qr";
-import { styledProfileLabel, styledProfileUrl, type UrlStyle } from "@/lib/profile-url";
-import { themeOf } from "@/lib/profile";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DEFAULT_PROFILE_QR_STYLE, type ProfileQrStyle } from "@/lib/profile-qr";
+import { renderProfileQr } from "@/lib/profile-qr-render";
+import { styledProfileUrl, type UrlStyle } from "@/lib/profile-url";
+import { useI18n } from "@/lib/i18n";
 
-/**
- * Studio-kaart voor de dynamische profiel-QR. De code encodeert altijd de
- * ROUT-profiel-URL, dus geprinte kaartjes blijven geldig als de links erachter
- * wijzigen.
- */
-export function ProfileQrCard({
-  handle,
-  urlStyle,
-  theme,
-  value,
-  onChange,
-  onSave,
-}: {
-  handle: string;
-  urlStyle: UrlStyle;
-  theme?: string;
-  /** Opgeslagen stijl (bv. `prefs.qrSettings`). Zonder waarde: lokale staat. */
-  value?: ProfileQrStyle | null;
-  /** Studio: `setPref("qrSettings", next)` zodat de autosave-draft de stijl meeneemt. */
-  onChange?: (next: ProfileQrStyle) => void;
-  /** Standalone gebruik: direct opslaan (bv. via `saveQrSettingsFn`). */
-  onSave?: (next: ProfileQrStyle) => void | Promise<unknown>;
+/** Draft-backed designer; previews and downloads use the public share renderer. */
+export function ProfileQrCard({ handle, urlStyle, value, onChange }: {
+  handle: string; urlStyle: UrlStyle; value?: ProfileQrStyle | null;
+  onChange: (next: ProfileQrStyle) => void;
 }) {
-  const palette = themeOf(theme ?? "cream");
-  const [localStyle, setLocalStyle] = useState<ProfileQrStyle>(value ?? DEFAULT_PROFILE_QR_STYLE);
-  const style: ProfileQrStyle = onChange ? (value ?? DEFAULT_PROFILE_QR_STYLE) : localStyle;
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const clean = handle.replace(/^@+/, "").trim();
-  const url = clean ? styledProfileUrl(clean, urlStyle) : "";
-  const label = clean ? styledProfileLabel(clean, urlStyle) : "rout.be/[handle]";
-
-  const svg = useMemo(() => (url ? profileQrSvg(url, style, { size: 512 }) : ""), [url, style]);
-
-  function commit(next: ProfileQrStyle) {
-    if (onChange) onChange(next);
-    else setLocalStyle(next);
-    if (onSave) {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-      saveTimer.current = setTimeout(() => {
-        Promise.resolve(onSave(next)).catch(() => toast.error("QR-stijl opslaan mislukt"));
-      }, 600);
-    }
-  }
-
-  function patch(next: Partial<ProfileQrStyle>) {
-    commit({ ...style, ...next });
-  }
-
-  function resetDefault() {
-    commit({ ...DEFAULT_PROFILE_QR_STYLE });
-    toast.success("Standaard ROUT-stijl hersteld");
-  }
-
-  function matchTheme() {
-    patch({
-      fgColor: (palette?.text as string) ?? "#1A1A1A",
-      bgColor: (palette?.bg as string) ?? "#FFFFFF",
-    });
-    toast.success("Kleuren overgenomen van je profielthema");
-  }
-
-  function download(blob: Blob, extension: string) {
-    const href = URL.createObjectURL(blob);
+  const { t } = useI18n();
+  const style = value ?? DEFAULT_PROFILE_QR_STYLE;
+  const url = handle ? styledProfileUrl(handle, urlStyle) : "";
+  const [rendered, setRendered] = useState<{ svg: string; png: string } | null>(null);
+  const [failed, setFailed] = useState(false);
+  const key = JSON.stringify(style);
+  useEffect(() => {
+    let active = true;
+    setRendered(null); setFailed(false);
+    if (url) void renderProfileQr(url, style).then(result => { if (active) setRendered(result); }).catch(() => { if (active) setFailed(true); });
+    return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url, key]);
+  const patch = (next: Partial<ProfileQrStyle>) => onChange({ ...style, ...next });
+  const download = (format: "png" | "svg") => {
+    if (!rendered) return;
     const anchor = document.createElement("a");
-    anchor.href = href;
-    anchor.download = `rout-${clean || "profiel"}-qr.${extension}`;
-    anchor.click();
-    URL.revokeObjectURL(href);
-  }
-
-  async function exportPng() {
-    if (!url) return;
-    const source = profileQrSvg(url, style, { size: 2048 });
-    const image = new Image();
-    image.decoding = "sync";
-    await new Promise<void>((resolve, reject) => {
-      image.onload = () => resolve();
-      image.onerror = () => reject(new Error("render_failed"));
-      image.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(source)))}`;
-    });
-    const canvas = document.createElement("canvas");
-    canvas.width = 2048;
-    canvas.height = 2048;
-    const context = canvas.getContext("2d");
-    if (!context) return;
-    context.drawImage(image, 0, 0, 2048, 2048);
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
-    if (blob) download(blob, "png");
-  }
-
-  return (
-    <section className="space-y-3">
-      <h2 className="flex items-center gap-2 px-1 text-lg font-medium">
-        <QrCode className="h-5 w-5" aria-hidden /> Profiel-QR
-      </h2>
-      <p className="px-1 text-sm text-muted-foreground">
-        Deze QR verwijst dynamisch naar <strong>{label}</strong>. Print hem op visitekaartjes: de
-        code blijft geldig, ook als je je links later aanpast.
-      </p>
-
-      <div className="grid gap-4 rounded-lg border border-border p-4 sm:grid-cols-[200px_1fr]">
-        <div
-          className="flex aspect-square items-center justify-center rounded-md border border-border p-2"
-          style={{ background: style.bgColor }}
-          // Eigen render-engine: dezelfde vectoren als de SVG/PDF-export.
-          dangerouslySetInnerHTML={{ __html: svg }}
-        />
-
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-4">
-            <label className="flex items-center gap-2 text-sm">
-              Voorgrond
-              <input
-                type="color"
-                value={style.fgColor}
-                onChange={(event) => patch({ fgColor: event.target.value })}
-                className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent"
-                aria-label="Voorgrondkleur"
-              />
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              Achtergrond
-              <input
-                type="color"
-                value={style.bgColor === "transparent" ? "#ffffff" : style.bgColor}
-                onChange={(event) => patch({ bgColor: event.target.value })}
-                className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent"
-                aria-label="Achtergrondkleur"
-              />
-            </label>
-            <Button size="sm" variant="outline" onClick={matchTheme}>
-              Kleuren overnemen van profiel
-            </Button>
-            <Button size="sm" variant="ghost" onClick={resetDefault}>
-              <RotateCcw className="mr-1 h-4 w-4" aria-hidden /> Herstel standaard ROUT-stijl
-            </Button>
-          </div>
-
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Hoekstijl</p>
-            <div className="flex gap-2">
-              {CORNER_STYLES.map((option) => (
-                <Button
-                  key={option.id}
-                  size="sm"
-                  variant={style.cornerStyle === option.id ? "default" : "outline"}
-                  onClick={() => patch({ cornerStyle: option.id as QrCornerStyle })}
-                >
-                  {option.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          <label className="flex items-center justify-between gap-3 text-sm">
-            <span>ROUT Rabbit-embleem in het midden</span>
-            <Switch
-              checked={style.emblem}
-              onCheckedChange={(checked) => patch({ emblem: checked })}
-              aria-label="Embleem tonen"
-            />
-          </label>
-
-          <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={exportPng} disabled={!url}>
-              <ImageIcon className="mr-1 h-4 w-4" aria-hidden /> PNG (2048px)
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() =>
-                download(
-                  new Blob([profileQrSvg(url, style, { size: 1024 })], {
-                    type: "image/svg+xml",
-                  }),
-                  "svg",
-                )
-              }
-              disabled={!url}
-            >
-              <Download className="mr-1 h-4 w-4" aria-hidden /> Vector SVG
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => download(profileQrPdf(url, style), "pdf")}
-              disabled={!url}
-            >
-              <FileText className="mr-1 h-4 w-4" aria-hidden /> Print-PDF (60 mm)
-            </Button>
-          </div>
+    anchor.href = rendered[format]; anchor.download = `rout-${handle}-qr.${format}`; anchor.click();
+  };
+  return <section className="space-y-4" data-tour="studio-qr">
+    <h2 className="flex items-center gap-2 text-lg font-medium"><QrCode className="size-5" />{t("studio.editor.qr")}</h2>
+    <div className="grid gap-4 sm:grid-cols-[160px_1fr]">
+      <div className="flex aspect-square items-center justify-center rounded-md border border-border">
+        {rendered ? <img src={rendered.svg} alt={t("studio.editor.qr")} className="h-full w-full" /> : <span role="status" className="p-3 text-xs text-muted-foreground">{t(failed ? "studio.qr.failed" : "studio.common.loading")}</span>}
+      </div>
+      <div className="min-w-0 space-y-3">
+        <div className="flex flex-wrap gap-4">
+          <label className="flex items-center gap-2 text-sm">{t("studio.qr.foreground")}<input type="color" aria-label={t("studio.qr.foreground")} value={style.fgColor} onChange={e => patch({ fgColor: e.target.value })} className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent" /></label>
+          <label className="flex items-center gap-2 text-sm">{t("studio.qr.background")}<input type="color" aria-label={t("studio.qr.background")} value={style.bgColor === "transparent" ? DEFAULT_PROFILE_QR_STYLE.bgColor : style.bgColor} onChange={e => patch({ bgColor: e.target.value, bgGradient: null })} className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent" /></label>
+        </div>
+        <label className="flex items-center justify-between gap-3 text-sm">{t("studio.qr.transparent")}<Switch checked={style.bgColor === "transparent" && !style.bgGradient} onCheckedChange={v => patch({ bgColor: v ? "transparent" : DEFAULT_PROFILE_QR_STYLE.bgColor, bgGradient: null })} /></label>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {([{ field: "dotStyle", options: ["square", "dots", "rounded", "extra-rounded", "classy", "classy-rounded"] }, { field: "outerCornerStyle", options: ["square", "dot", "extra-rounded"] }, { field: "innerCornerStyle", options: ["square", "dot"] }] as const).map(({ field, options }) => <label key={field} className="min-w-0 space-y-1 text-xs">
+            <span>{t(`studio.qr.${field}`)}</span>
+            <Select value={style[field] ?? (field === "dotStyle" ? style.cornerStyle === "smooth" ? "rounded" : style.cornerStyle : "square")} onValueChange={v => patch({ [field]: v })}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{options.map(option => <SelectItem key={option} value={option}>{t(`studio.qr.shape.${option}`)}</SelectItem>)}</SelectContent></Select>
+          </label>)}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" disabled={!rendered} onClick={() => download("png")}><Download className="size-4" />PNG</Button>
+          <Button size="sm" variant="outline" disabled={!rendered} onClick={() => download("svg")}><Download className="size-4" />SVG</Button>
+          <Button size="icon" variant="ghost" aria-label={t("studio.qr.reset")} title={t("studio.qr.reset")} onClick={() => onChange({ ...DEFAULT_PROFILE_QR_STYLE })}><RotateCcw className="size-4" /></Button>
         </div>
       </div>
-    </section>
-  );
+    </div>
+  </section>;
 }
