@@ -11,6 +11,7 @@ import { ProfileIntegrations } from "@/components/profile/ProfileIntegrations";
 import { ProfileGuestbook } from "@/components/profile/ProfileGuestbook";
 import { ProfileQuestions } from "@/components/profile/ProfileQuestions";
 import { TipJarButton } from "@/components/profile/TipJarButton";
+import { ProfilePageTabs } from "@/components/profile/ProfilePageTabs";
 import { useWireframeMode, WireframeOverlay } from "@/components/profile/WireframeMode";
 import { cn } from "@/lib/utils";
 import {
@@ -428,6 +429,7 @@ export function ProfileView({
           )}
           <ProfilePassport handle={profile.username} theme={t} compact />
         </h1>
+        {profile.username && <ProfilePageTabs handle={profile.username} theme={t} />}
         {profile.username && <SnapchatProfile handle={profile.username} theme={t} />}
         {profile.username && <NowPlaying handle={profile.username} theme={t} />}
         {profile.username && <ProfileIntegrations handle={profile.username} theme={t} exclude={liveProviders} />}
