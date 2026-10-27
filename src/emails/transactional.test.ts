@@ -9,7 +9,7 @@ const UNSUB = /unsubscribe|\[UNSUBSCRIBE\]|\{\{\s*unsubscribe|mirror|afmelden/i;
 describe("transactional marking", () => {
   it("tags every mail transactional, auth mails also security", () => {
     expect(transactionalTags("payment")).toEqual(["transactional"]);
-    expect(transactionalTags("login", ["x"])).toEqual(["transactional", "security", "x"]);
+    expect(transactionalTags("login", ["x"])).toEqual(["transactional", "security", "auth", "otp", "x"]);
   });
   it("sends the X-Mailin-Tag transactional header", () => {
     expect(TRACKING_OFF_HEADERS["X-Mailin-Tag"]).toBe("transactional");

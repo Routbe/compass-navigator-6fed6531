@@ -42,7 +42,8 @@ const SECURITY_CATEGORIES = new Set([
 /** Every mail is tagged transactional (+ security for auth mails); caller tags are kept. */
 export function transactionalTags(category?: string, extra?: string[]): string[] {
   const tags = ["transactional"];
-  if (category && SECURITY_CATEGORIES.has(category)) tags.push("security");
+  if (category && SECURITY_CATEGORIES.has(category)) tags.push("security", "auth");
+  if (category === "login") tags.push("otp");
   for (const t of extra ?? []) if (t && !tags.includes(t)) tags.push(t);
   return tags;
 }
