@@ -227,7 +227,7 @@ export function systemNoticeTemplate(lang: "nl" | "en" = "en"): BuiltMail {
 
 export type AuthIntent = "magic-link" | "verification" | "password-reset" | "email-change" | "welcome";
 
-export function renderAuthMail(intent: AuthIntent, lang: string, v: { link?: string; code?: string; name?: string }): BuiltMail {
+export function renderAuthMail(intent: AuthIntent, lang: string, v: { link?: string; code?: string; name?: string; to?: string }): BuiltMail {
   const c = copyFor(lang);
   const link = v.link && /^https?:\/\//i.test(v.link) ? esc(v.link) : "";
   const code = v.code ? esc(v.code) : "";
@@ -235,7 +235,11 @@ export function renderAuthMail(intent: AuthIntent, lang: string, v: { link?: str
   const desk = c.desks.auth;
   const wrap = (subject: string, pre: string, badge: string, accent: Accent, title: string, body: string[]): BuiltMail => ({
     subject,
-    html: shell({ lang, title, preheader: pre, badge, accent, desk, body: [h1(title), ...body] }),
+    html: shell({
+      lang, title, preheader: pre, badge, accent, desk, body: [h1(title), ...body],
+      ...(link && v.link ? { actionUrl: v.link } : {}),
+      recipient: v.to ? esc(v.to) : "je e-mailadres",
+    }),
   });
   const linkBlocks = (btn: string, urlLabel: string) => (link ? [button(btn, link), urlBox(urlLabel, link)] : []);
 

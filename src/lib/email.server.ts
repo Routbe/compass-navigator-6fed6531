@@ -103,6 +103,17 @@ export interface SendLocalizedEmailInput {
   payload?: EmailPayload;
 }
 
+/** Clean text/plain part for every auth mail (multipart, no HTML remnants). */
+export function authPlainText(subject: string, code: string, link: string, to: string): string {
+  return [
+    subject,
+    "",
+    ...(code ? [`Code: ${code}`, ""] : []),
+    ...(link ? [link, ""] : []),
+    `Deze transactionele beveiligingsmail is verzonden naar ${to} wegens een inlogpoging op rout.be. Als jij dit niet was, kun je dit veilig negeren. ROUT is een soevereine infrastructuur, gehost in Europa.`,
+  ].join("\n");
+}
+
 async function dispatch(input: SendLocalizedEmailInput): Promise<boolean> {
   const intent = input.intent ?? input.type;
   const locale = normalizeLocale(input.locale);
@@ -122,7 +133,7 @@ async function dispatch(input: SendLocalizedEmailInput): Promise<boolean> {
     const { sendMail } = await import("@/emails/send.server");
     // Eén ROUT-design voor elke auth-mail; de Brevo-template blijft vangnet.
     const { renderAuthMail } = await import("@/emails/design/mails");
-    const { subject, html } = renderAuthMail(intent, locale, { link, code, name });
+    const { subject, html } = renderAuthMail(intent, locale, { link, code, name, to });
     const result = await sendMail({
       html,
       htmlFirst: true,
@@ -130,7 +141,7 @@ async function dispatch(input: SendLocalizedEmailInput): Promise<boolean> {
       to,
       subject,
       templateId: resolveTemplateId(intent, locale) || undefined,
-      text: link ? `${subject}: ${link}` : subject,
+      text: authPlainText(subject, code, link, to),
       params: {
         LINK: link,
         MAGIC_LINK: link,
@@ -142,7 +153,7 @@ async function dispatch(input: SendLocalizedEmailInput): Promise<boolean> {
         NAME: name,
         LANG: locale,
       },
-      tags: [`auth-${intent}`],
+      tags: ["otp", "auth", `auth-${intent}`],
     });
     if (!result.sent) {
       console.error("[email] dispatch failed", { intent, locale, error: result.error ?? "unknown" });
