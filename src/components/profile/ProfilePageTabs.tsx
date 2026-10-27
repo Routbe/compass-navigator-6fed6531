@@ -14,10 +14,10 @@ export function ProfilePageTabs({ handle, theme, active = "profile" }: { handle:
   const pill = (on: boolean) => `inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition ${on ? `${theme.card} ${theme.text} border ${theme.border}` : `${theme.muted} hover:opacity-80`}`;
   return (
     <nav aria-label={t("profile.pagesNav", "Pagina's")} className="flex justify-center gap-1">
-      <Link to="/$handle" params={{ handle }} aria-current={active === "profile" ? "page" : undefined} className={pill(active === "profile")}>
+      <Link to="/$username" params={{ username: handle }} aria-current={active === "profile" ? "page" : undefined} className={pill(active === "profile")}>
         <BadgeCheck className="h-3.5 w-3.5" aria-hidden />{t("profile.pageProfile", "Profiel")}
       </Link>
-      <Link to="/u/$username/tip" params={{ username: handle }} search={{ donation: undefined, status: undefined }} aria-current={active === "tip" ? "page" : undefined} className={pill(active === "tip")}>
+      <Link to="/$username/tip" params={{ username: handle }} search={{ donation: undefined, status: undefined }} aria-current={active === "tip" ? "page" : undefined} className={pill(active === "tip")}>
         <HeartHandshake className="h-3.5 w-3.5" aria-hidden />{t("profile.pageTip", "Steunpagina")}
       </Link>
     </nav>
