@@ -34,14 +34,25 @@ export function esc(value: unknown): string {
     .replace(/'/g, "&#39;");
 }
 
-const SOCIALS: Array<[string, string, string]> = [
-  ["https://github.com/routbe", "github.com", "GitHub"],
-  ["https://bsky.app/profile/rout.be", "bsky.app", "Bluesky"],
-  ["https://mastodon.social/@routbe", "mastodon.social", "Mastodon"],
-  ["https://linkedin.com/company/routbe", "linkedin.com", "LinkedIn"],
-  ["https://instagram.com/rout.be", "instagram.com", "Instagram"],
-  ["https://eyou.social/u/rout", "eyou.social", "Eyou"],
-];
+/** Dogfooding: one first-party badge instead of external social icons (spam triggers). PNG — mail clients strip SVG/<picture>. */
+export const ROUT_BADGE_HTML =
+  `<a href="https://rout.be/rout.be" target="_blank" style="text-decoration: none;"><img src="https://rout.be/img/verified-on-rout.png" width="160" height="34" alt="Verified on ROUT" style="display: block; border: 0; width: 160px; height: 34px;"></a>`;
+
+/** Gmail ViewAction schema; only for real https action links. */
+export function viewActionJsonLd(url: string, name: string, description: string): string {
+  if (!/^https:\/\//i.test(url)) return "";
+  const json = JSON.stringify({
+    "@context": "http://schema.org",
+    "@type": "EmailMessage",
+    potentialAction: { "@type": "ViewAction", url, name },
+    description,
+  }).replace(/</g, "\\u003c");
+  return `<script type="application/ld+json">${json}</script>`;
+}
+
+/** Functional security disclaimer under the badge (balances text-to-link ratio). */
+export const securityDisclaimer = (email: string) =>
+  `<div style="margin-top: 14px; font-size: 10px; line-height: 1.5; color: #9ca3af;">Deze transactionele beveiligingsmail is verzonden naar ${email} wegens een inlogpoging op rout.be. Als jij dit niet was, kun je dit veilig negeren. ROUT is een soevereine infrastructuur, gehost in Europa.</div>`;
 
 const FOOTER_TEXT: Record<string, { privacy: string; terms: string; by: string }> = {
   nl: { privacy: "Privacy", terms: "Voorwaarden", by: "Ontworpen &amp; gebouwd door" },
@@ -125,15 +136,16 @@ export interface ShellOptions {
   accent: Accent;
   desk: { name: string; role: string };
   body: string[];
+  /** Auth mails: Gmail ViewAction target (magic link). */
+  actionUrl?: string;
+  /** Auth mails: escaped recipient (or Brevo placeholder) for the disclaimer. */
+  recipient?: string;
 }
 
 export function shell(o: ShellOptions): string {
   const f = FOOTER_TEXT[o.lang] ?? FOOTER_TEXT.en!;
   const color = ACCENT[o.accent] ?? ACCENT.neutral;
-  const socials = SOCIALS.map(
-    ([href, host, alt]) =>
-      `<td style="padding-right: 12px;" valign="middle"><a href="${href}" target="_blank" style="text-decoration: none;"><img src="https://a.favicon.im/${host}?larger=true" width="16" height="16" alt="${alt}" style="display: block; border: 0; border-radius: 3px;"></a></td>`,
-  ).join("");
+  const jsonLd = o.actionUrl ? viewActionJsonLd(o.actionUrl, "Inloggen bij ROUT", "Eenmalige inlogcode voor ROUT") : "";
   const year = new Date().getUTCFullYear();
   return `<!DOCTYPE html>
 <html lang="${esc(o.lang)}" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -145,6 +157,7 @@ export function shell(o: ShellOptions): string {
 <meta name="supported-color-schemes" content="light only" />
 <title>${o.title} — ROUT</title>
 <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->
+${jsonLd}
 <style type="text/css">
 :root { color-scheme: light only; supported-color-schemes: light only; }
 body { margin: 0 !important; padding: 0 !important; width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
@@ -171,9 +184,10 @@ ${o.body.join("\n")}
 <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-top: 20px;"><tr><td style="border-left: 3px solid #111111; padding-left: 14px; font-family: ${MONO};"><div style="font-weight: 700; font-size: 14px; color: #111111;">${o.desk.name}</div><div style="font-size: 12px; color: #666666; margin-top: 2px;">${o.desk.role}</div></td></tr></table>
 </td></tr>
 <tr><td class="rout-padding" style="padding: 20px 28px 28px 28px; background-color: #fafafa; border-top: 1px solid #f0f0ec; font-family: ${MONO};">
-<table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;"><tr>${socials}</tr></table>
+<div style="margin-bottom: 20px;">${ROUT_BADGE_HTML}</div>
 <div style="font-size: 12px; line-height: 1.6; color: #666666; margin-bottom: 16px;"><a href="https://rout.be" target="_blank" style="color: #111111; text-decoration: none;">rout.be</a> <span style="color: #cccccc; margin: 0 8px;">·</span> <a href="https://rout.be/privacy" target="_blank" style="color: #666666; text-decoration: none;">${f.privacy}</a> <span style="color: #cccccc; margin: 0 8px;">·</span> <a href="https://rout.be/terms" target="_blank" style="color: #666666; text-decoration: none;">${f.terms}</a> <span style="color: #cccccc; margin: 0 8px;">·</span> <a href="https://rout.be/manifesto" target="_blank" style="color: #666666; text-decoration: none;">Manifesto</a></div>
 <div style="border-top: 1px solid #eeeeea; padding-top: 14px; font-size: 11px; line-height: 1.6; color: #888888;"><div>© ${year} ROUT <span style="color: #cccccc;">·</span> Open Source (AGPLv3)</div><div style="margin-top: 2px; color: #777777;">${f.by} <a href="https://delplanche.cloud" target="_blank" style="color: #111111; text-decoration: underline; font-weight: 600;">Delplanche</a></div></div>
+${o.recipient ? securityDisclaimer(o.recipient) : ""}
 </td></tr>
 </table>
 <!--[if mso]></td></tr></table><![endif]-->
