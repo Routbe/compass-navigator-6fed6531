@@ -238,32 +238,24 @@ export function ProfileView({
         const followers = formatFollowers(link.followerCount);
         const username = (link as { username?: string | null }).username ?? null;
         return (
-          <a
+          <span
             key={link.platform}
-            href={link.url}
-            target="_blank"
-            rel="me noopener noreferrer"
-            title={`${PLATFORM_LABEL[link.platform]} — ${profileText(locale, "verified")}`}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium transition-opacity hover:opacity-80"
+            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium"
             style={{ border: `1px solid ${t.border}`, color: t.muted }}
           >
-            {username ? (
-              <>
-                <SocialPlatformIcon source={link.url} className="h-3.5 w-3.5 text-current" />
-                <span>@{username.replace(/^@/, "")}</span>
-                <BadgeCheck className="h-3 w-3 text-emerald-500" aria-hidden />
-              </>
-            ) : (
-              <span className="relative inline-flex">
-                <SocialPlatformIcon source={link.url} className="h-3.5 w-3.5 text-current" />
-                <BadgeCheck
-                  className="absolute -right-1 -top-1 z-10 h-2.5 w-2.5 text-emerald-500"
-                  aria-hidden
-                />
-              </span>
-            )}
-            {followers && <span>{followers}  {tx("profile.followersLabel")} </span>}
-          </a>
+            <a
+              href={link.url}
+              target="_blank"
+              rel="me noopener noreferrer"
+              title={PLATFORM_LABEL[link.platform]}
+              className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-80"
+            >
+              <SocialPlatformIcon source={link.url} className="h-3.5 w-3.5 text-current" />
+              {username && <span>@{username.replace(/^@/, "")}</span>}
+              {followers && <span>{followers}  {tx("profile.followersLabel")} </span>}
+            </a>
+            <VerifiedAccountCheck platform={PLATFORM_LABEL[link.platform]} handle={username} className="h-3 w-3" theme={t} />
+          </span>
         );
       })}
     </div>
