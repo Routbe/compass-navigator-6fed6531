@@ -7,6 +7,7 @@ import { ProfileYouTubeCard } from "@/components/profile/YouTubeCard";
 import { isProfileSectionKind, usesSectionFallback } from "@/lib/profile-section-blocks";
 import { NowPlaying, useNowPlaying } from "@/components/profile/NowPlaying";
 import { SnapchatProfile } from "@/components/profile/SnapchatProfile";
+import { VerifiedAccountCheck } from "@/components/profile/VerifiedAccountCheck";
 import { ProfileIntegrations } from "@/components/profile/ProfileIntegrations";
 import { ProfileGuestbook } from "@/components/profile/ProfileGuestbook";
 import { ProfileQuestions } from "@/components/profile/ProfileQuestions";
@@ -724,7 +725,7 @@ export function ProfileView({
                 {!iconOnly && <span className="min-w-0 flex-1 truncate text-center">{b.label}</span>}
                 {(profile.social_links ?? []).filter(link => link.isVerified && link.platform === b.kind && socialHandleKey(link.username) === socialHandleKey(b.value)).slice(0, 1).map(link => (
                   <span key={link.platform} className="inline-flex items-center gap-1 text-emerald-500">
-                    <BadgeCheck className="h-4 w-4" aria-label={profileText(locale, "verified")} />
+                    <VerifiedAccountCheck platform={PLATFORM_LABEL[link.platform]} handle={link.username} className="h-4 w-4" theme={t} />
                     {link.followerCount !== null && <span className="text-xs">{formatFollowers(link.followerCount)}</span>}
                   </span>
                 ))}
