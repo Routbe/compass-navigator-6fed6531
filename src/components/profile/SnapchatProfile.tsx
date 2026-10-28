@@ -23,7 +23,7 @@ export function SnapchatProfile({ handle, theme }: { handle: string; theme: T })
         </div>
       )}
       {data.card && (
-        <div className="flex items-center gap-3 rounded-2xl border p-3" style={box}>
+        <div className="flex w-full items-center gap-3 rounded-2xl border p-3" style={{ ...box, borderRadius: "var(--profile-radius, 1rem)" }}>
           {data.card.bitmojiUrl ? (
             <img src={proxied(data.card.bitmojiUrl) ?? ""} alt="Bitmoji" className="h-12 w-12 object-contain" />
           ) : (

@@ -10,6 +10,7 @@ import {
   serializeGalleryConfig,
   type GalleryConfig,
   type GalleryItem,
+  newGalleryItemId,
 } from "@/lib/gallery";
 
 /** Studio-paneel voor het native `media_gallery`-component. */
@@ -23,6 +24,13 @@ export function GalleryBlockSettings({
   onTitle: (label: string) => void;
 }) {
   const [dialog, setDialog] = useState(false);
+  const [urlInput, setUrlInput] = useState("");
+  const addUrl = () => {
+    const url = urlInput.trim();
+    if (!/^https:\/\/[^\s]+$/i.test(url)) return;
+    addItem({ id: newGalleryItemId(), url, alt: "", caption: "" } as GalleryItem);
+    setUrlInput("");
+  };
   const config = parseGalleryConfig(value);
 
   const update = (patch: Partial<GalleryConfig>) => {
@@ -93,17 +101,27 @@ export function GalleryBlockSettings({
         </ul>
       )}
 
+      <div className="flex gap-1.5">
+        <Input
+          className="input-field h-9 min-w-0 flex-1 rounded-xl"
+          placeholder="https://… afbeeldingslink"
+          value={urlInput}
+          onChange={(e) => setUrlInput(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addUrl(); } }}
+          aria-label="Afbeeldingslink"
+        />
+        <button type="button" onClick={addUrl} disabled={!urlInput.trim() || config.items.length >= GALLERY_MAX_ITEMS} className="h-9 shrink-0 rounded-xl border border-border px-3 text-[11px] font-medium hover:bg-muted disabled:opacity-50">Link toevoegen</button>
+      </div>
       <button
         type="button"
         onClick={() => setDialog(true)}
         disabled={config.items.length >= GALLERY_MAX_ITEMS}
         className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-border text-[11px] font-medium hover:bg-muted disabled:opacity-50"
       >
-        <ImagePlus className="h-3.5 w-3.5" /> Foto toevoegen
+        <ImagePlus className="h-3.5 w-3.5" /> Foto uploaden
       </button>
       <p className="text-[10px] text-muted-foreground">
-        {config.items.length}/{GALLERY_MAX_ITEMS} foto's — upload een bestand of plak een
-        afbeeldings-URL.
+        {config.items.length}/{GALLERY_MAX_ITEMS} foto's — links zijn onbeperkt, geüploade foto's tellen mee voor je gratis opslag.
       </p>
 
       <GalleryImageDialog open={dialog} onOpenChange={setDialog} onAdd={addItem} />
