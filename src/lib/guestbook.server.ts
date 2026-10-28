@@ -19,7 +19,7 @@ async function publicOwnerId(handle: string): Promise<string | null> {
   const rows = (await sql`select id from public.profiles
      where lower(username) = lower(${handle})
        and coalesce((display_prefs ->> 'publicProfile')::boolean, true)
-       and coalesce((display_prefs ->> 'guestbookEnabled')::boolean, true)
+       and coalesce((display_prefs ->> 'guestbookEnabled')::boolean, false)
        and coalesce(is_banned, false) = false
        and coalesce(is_suspended, false) = false
        and coalesce(status, 'active') not in ('frozen', 'banned', 'suspended') limit 1`) as Row[];

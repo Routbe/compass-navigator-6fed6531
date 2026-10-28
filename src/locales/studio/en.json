@@ -14,7 +14,7 @@
   "studio.favicon.choose": "Choose favicon",
   "studio.common.delete": "Delete",
   "studio.favicon.help": "Automatically resized to 64×64 WebP (max. 15 KB). Your public page uses your avatar as its browser icon by default.",
-  "studio.guestbook.title": "Guestbook",
+  "studio.guestbook.title": "Message board",
   "studio.guestbook.empty": "No messages yet. Signed-in ROUT members can leave a message on your profile.",
   "studio.common.unknown": "unknown",
   "studio.guestbook.unpin": "Unpin",
