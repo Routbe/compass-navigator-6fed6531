@@ -38,6 +38,7 @@ import { isProfileSectionKind } from "@/lib/profile-section-blocks";
 import { BlockRulesPopover } from "@/components/studio/BlockRulesPopover";
 import { BookingBlockSettings } from "@/components/dashboard/BookingBlockSettings";
 import { GalleryBlockSettings } from "@/components/dashboard/GalleryBlockSettings";
+import { SocialFeedBlockSettings } from "@/components/dashboard/SocialFeedBlockSettings";
 import { MediaEmbedBlockSettings } from "@/components/dashboard/MediaEmbedBlockSettings";
 import { ContactFormBlockSettings } from "@/components/dashboard/ContactFormBlockSettings";
 import { EventListBlockSettings } from "@/components/dashboard/EventListBlockSettings";
@@ -267,6 +268,12 @@ export function ProfileLinksManager({
                     />
                   ) : b.kind === "media_gallery" ? (
                     <GalleryBlockSettings
+                      value={b.value}
+                      onChange={(value) => patch(b.id, { value })}
+                      onTitle={(label) => patch(b.id, { label })}
+                    />
+                  ) : b.kind === "social_feed" ? (
+                    <SocialFeedBlockSettings
                       value={b.value}
                       onChange={(value) => patch(b.id, { value })}
                       onTitle={(label) => patch(b.id, { label })}

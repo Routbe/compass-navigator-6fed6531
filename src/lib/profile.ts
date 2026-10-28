@@ -796,6 +796,12 @@ export const BLOCK_KINDS: {
     placeholder: "Mijn galerij",
   },
   {
+    kind: "social_feed",
+    label: "Bluesky / Mastodon posts",
+    category: "media" as const,
+    placeholder: "Automatische posts",
+  },
+  {
     kind: "media_embed",
     label: "Video, Muziek & Documenten",
     category: "media" as const,
@@ -1245,6 +1251,7 @@ export function blockHref(block: ProfileBlock): string {
     case "booking_request":
     case "media_gallery":
     case "media_embed":
+    case "social_feed":
     case "contact_form":
     case "live_poll":
     case "faq_accordion":
@@ -1276,6 +1283,7 @@ export const isWidgetBlock = (kind: string) =>
   kind === "booking_request" ||
   kind === "media_gallery" ||
   kind === "media_embed" ||
+  kind === "social_feed" ||
   kind === "contact_form" ||
   kind === "live_poll" ||
   kind === "faq_accordion" ||

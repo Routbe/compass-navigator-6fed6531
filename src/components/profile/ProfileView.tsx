@@ -7,6 +7,7 @@ import { ProfileYouTubeCard } from "@/components/profile/YouTubeCard";
 import { isProfileSectionKind, usesSectionFallback } from "@/lib/profile-section-blocks";
 import { NowPlaying, useNowPlaying } from "@/components/profile/NowPlaying";
 import { SnapchatProfile } from "@/components/profile/SnapchatProfile";
+import { SocialFeedCard } from "@/components/profile/SocialFeedCard";
 import { VerifiedAccountCheck } from "@/components/profile/VerifiedAccountCheck";
 import { ProfileIntegrations } from "@/components/profile/ProfileIntegrations";
 import { ProfileGuestbook } from "@/components/profile/ProfileGuestbook";
@@ -615,6 +616,8 @@ export function ProfileView({
             ) : isWidgetBlock(b.kind) || isBookingUrl(blockHref(b)) ? (
               b.kind === "media_gallery" ? (
                 <GalleryCard key={b.id} config={parseGalleryConfig(b.value)} style={buttonStyle} />
+              ) : b.kind === "social_feed" ? (
+                <SocialFeedCard key={b.id} value={b.value} style={buttonStyle} />
               ) : b.kind === "media_embed" ? (
                 <MediaEmbedCard key={b.id} value={b.value} style={buttonStyle} />
               ) : b.kind === "contact_form" ? (
